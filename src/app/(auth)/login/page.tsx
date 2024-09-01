@@ -12,7 +12,7 @@ export default function Login() {
     // Ensure localStorage is accessed only on the client side
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
-      if (token == null) {
+      if (token != null) {
         router.push('/');
       }
     }
