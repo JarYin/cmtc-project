@@ -1,20 +1,47 @@
 "use client"
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const router = useRouter();
+  if(localStorage.getItem('token') != null){
+    router.push('/');
+  }
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (event:any) => {
+  const handleSubmit = async (event:any) => {
     event.preventDefault();
 
-    // Implement login logic here (e.g., send data to backend API)
-    console.log('Email:', email);
-    console.log('Password:', password);
+    try {
+      const res = await fetch('http://localhost:3000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-    setEmail('');
-    setPassword('');
+      const data = await res.json();
+
+      if (res.status === 200) {
+        // บันทึก token ลง localStorage
+        localStorage.setItem('token', data.token);
+
+        // รีเซ็ตค่า input
+        setUsername('');
+        setPassword('');
+
+        // เปลี่ยนไปยังหน้าอื่น
+        window.location.href = '/';
+      } else {
+        // จัดการกับข้อผิดพลาด
+        console.error(data.error);
+      }
+    } catch (error) {
+      console.error('An error occurred:', error);
+    }
   };
 
   return (
@@ -23,15 +50,15 @@ export default function Login() {
 
       <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
         <div className="flex flex-col">
-          <label htmlFor="email" className="text-gray-700 mb-2">
-            Email:
+          <label htmlFor="username" className="text-gray-700 mb-2">
+            Username:
           </label>
           <input
-            type="email"
-            id="email"
-            name="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="username"
+            id="username"
+            name="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
             required
           />
