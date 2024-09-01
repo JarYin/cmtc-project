@@ -14,9 +14,15 @@ type User = {
 // define the Page component
 export default function Page() {
   const router = useRouter();
-  if (localStorage.getItem("token") == null) {
-    router.push("/login");
-  }
+  useEffect(() => {
+    // Ensure this code runs only on the client side
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      if (token != null) {
+        router.push("/");
+      }
+    }
+  }, [router]);
   // use state to manage the list of users
   const [items, setItems] = useState<Array<User>>([]);
 
@@ -78,31 +84,36 @@ export default function Page() {
                 {items.map((item) => {
                   const handleSubmit = async (e: React.FormEvent) => {
                     e.preventDefault();
-                
+
                     try {
-                      const res = await fetch(`http://localhost:3001/api/delete/${item.id}`, {
-                        method: "DELETE", // Use PUT to update the resource
-                        headers: {
-                          "Content-Type": "application/json",
-                          Accept: "application/json",
-                        },
-                        body: JSON.stringify(item.id),
-                      });
-                
+                      const res = await fetch(
+                        `http://localhost:3001/api/delete/${item.id}`,
+                        {
+                          method: "DELETE", // Use PUT to update the resource
+                          headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                          },
+                          body: JSON.stringify(item.id),
+                        }
+                      );
+
                       // Check if the response has content before parsing
                       if (!res.ok) {
                         throw new Error(
                           `Failed to update user: ${res.status} ${res.statusText}`
                         );
                       }
-                
+
                       // If the server returns a 204 No Content status, we shouldn't try to parse JSON
                       let result;
                       if (res.status !== 204) {
                         result = await res.json();
                       }
-                
-                      console.log(result || "Update successful with no content");
+
+                      console.log(
+                        result || "Update successful with no content"
+                      );
                     } catch (error) {
                       console.error("Error updating user:", error);
                     }

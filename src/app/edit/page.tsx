@@ -1,12 +1,18 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Edit() {
   const router = useRouter();
-  if (localStorage.getItem("token") == null) {
-    router.push("/login");
-  }
+  useEffect(() => {
+    // Ensure this code runs only on the client side
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      if (token != null) {
+        router.push("/");
+      }
+    }
+  }, [router]);
   const [firstname, setFirstName] = useState("");
   const [lastname, setLastName] = useState("");
   const [username, setUserName] = useState("");

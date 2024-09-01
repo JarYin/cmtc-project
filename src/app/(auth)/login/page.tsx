@@ -1,17 +1,24 @@
-"use client"
-import { useState } from 'react';
+"use client";
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function Login() {
   const router = useRouter();
-  if(localStorage.getItem('token') != null){
-    router.push('/');
-  }
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = async (event:any) => {
+  useEffect(() => {
+    // Ensure localStorage is accessed only on the client side
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token != null) {
+        router.push('/');
+      }
+    }
+  }, [router]);
+
+  const handleSubmit = async (event: any) => {
     event.preventDefault();
 
     try {
@@ -26,17 +33,17 @@ export default function Login() {
       const data = await res.json();
 
       if (res.status === 200) {
-        // บันทึก token ลง localStorage
+        // Save token to localStorage
         localStorage.setItem('token', data.token);
 
-        // รีเซ็ตค่า input
+        // Reset input values
         setUsername('');
         setPassword('');
 
-        // เปลี่ยนไปยังหน้าอื่น
+        // Redirect to another page
         window.location.href = '/';
       } else {
-        // จัดการกับข้อผิดพลาด
+        // Handle errors
         console.error(data.error);
       }
     } catch (error) {
@@ -54,7 +61,7 @@ export default function Login() {
             Username:
           </label>
           <input
-            type="username"
+            type="text"
             id="username"
             name="username"
             value={username}
